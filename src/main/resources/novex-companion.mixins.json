@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "no.novex.companion.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "TabBadgeMixin",
+    "ChatBadgeMixin",
+    "NametagBadgeMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

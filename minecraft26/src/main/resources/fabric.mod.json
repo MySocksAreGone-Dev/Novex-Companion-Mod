@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "novex_companion",
+  "version": "${version}",
+  "name": "Novex Companion",
+  "description": "Novex friends, messages, partner servers and verified badges inside Minecraft.",
+  "authors": [
+    "Novex"
+  ],
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "no.novex.companion.NovexCompanion"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "${minecraft}",
+    "java": ">=25",
+    "fabric-screen-api-v1": "*",
+    "fabric-lifecycle-events-v1": "*",
+    "fabric-resource-loader-v1": "*"
+  },
+  "icon": "assets/novex_companion/icon.png",
+  "mixins": [
+    "novex-companion.mixins.json"
+  ],
+  "license": "LicenseRef-Novex-Proprietary",
+  "contact": {
+    "sources": "https://github.com/MySocksAreGone-Dev/Novex-Companion-Mod",
+    "issues": "https://github.com/MySocksAreGone-Dev/Novex-Companion-Mod/issues"
+  }
+}

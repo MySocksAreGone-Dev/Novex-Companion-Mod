@@ -1,0 +1,59 @@
+plugins { id 'net.fabricmc.fabric-loom' version '1.17.21' }
+def versions = new groovy.json.JsonSlurper().parse(file('versions.json'))
+def target = providers.gradleProperty('target').getOrElse('26.3')
+if (!versions.containsKey(target)) throw new GradleException("Unsupported 26.x target: ${target}")
+version = "0.3.0+mc${target}"
+group = 'no.novex'
+base { archivesName = 'novex-companion' }
+layout.buildDirectory = file("../build/${target}")
+repositories { mavenCentral() }
+dependencies {
+ minecraft "com.mojang:minecraft:${target}"
+ implementation 'net.fabricmc:fabric-loader:0.19.5'
+ implementation fabricApi.module('fabric-screen-api-v1', versions[target])
+ implementation fabricApi.module('fabric-lifecycle-events-v1', versions[target])
+ implementation fabricApi.module('fabric-resource-loader-v1', versions[target])
+}
+loom {
+ splitEnvironmentSourceSets()
+ mods { novex_companion { sourceSet sourceSets.main; sourceSet sourceSets.client } }
+}
+sourceSets {
+ shared {
+  java.srcDir '../src/client/java'
+  java.include '**/SupabaseApi.java', '**/SessionVault.java', '**/NovexConfig.java', '**/MenuPlacement.java'
+  compileClasspath += sourceSets.client.compileClasspath
+ }
+ client { compileClasspath += sourceSets.shared.output; runtimeClasspath += sourceSets.shared.output }
+ verification {
+  java.srcDir '../src/verification/java'
+  compileClasspath += sourceSets.client.output + sourceSets.shared.output + sourceSets.client.compileClasspath
+  runtimeClasspath += sourceSets.client.output + sourceSets.shared.output + sourceSets.client.runtimeClasspath
+ }
+}
+jar { from sourceSets.shared.output }
+processResources {
+ inputs.property 'minecraft', target
+ inputs.property 'version', project.version
+ filesMatching('fabric.mod.json') { expand 'minecraft': target, 'version': project.version }
+ from('../src/main/resources') { exclude 'fabric.mod.json' }
+}
+tasks.withType(JavaCompile).configureEach { options.release = 25; options.encoding = 'UTF-8' }
+java { toolchain.languageVersion = JavaLanguageVersion.of(25); withSourcesJar() }
+tasks.register('foundationTest', JavaExec) {
+ dependsOn verificationClasses, clientClasses
+ classpath = sourceSets.verification.runtimeClasspath
+ mainClass = 'no.novex.companion.FoundationTest'
+ javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
+}
+check.dependsOn foundationTest
+loom.mods.novex_companion.sourceSet(sourceSets.shared)
+sourcesJar { from sourceSets.shared.allSource }
+sourceSets.client.java.srcDir("src/compat/${target == '26.3' ? 'modern' : 'legacy'}")
+processResources.filesMatching('novex-companion.mixins.json') {
+ filter { line -> line.replace('JAVA_21', 'JAVA_25') }
+}
+sourceSets.client.java.srcDir("src/compat/${target == '26.1.2' ? 'screen261' : 'screen262'}")
+
+// The isolated 26.x build uses the same project license.
+tasks.withType(Jar).configureEach { from(file('../LICENSE')) }

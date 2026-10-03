@@ -1,0 +1,61 @@
+plugins { id 'net.fabricmc.fabric-loom-remap' version "${loom_version}" }
+def targets = new groovy.json.JsonSlurper().parse(file('versions.json'))
+def target = providers.gradleProperty('target').getOrElse('1.21.11')
+if (!targets.containsKey(target)) throw new GradleException("Unsupported target: ${target}")
+ext.minecraft_version = target
+ext.yarn_mappings = targets[target].mappings
+ext.fabric_version = targets[target].api
+layout.buildDirectory = file("build/${target}")
+version = "${mod_version}+mc${minecraft_version}"
+group = maven_group
+base { archivesName = archives_base_name }
+repositories { mavenCentral() }
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings "net.fabricmc:yarn:${yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${loader_version}"
+    modImplementation fabricApi.module("fabric-screen-api-v1", fabric_version)
+    modImplementation fabricApi.module("fabric-resource-loader-v0", fabric_version)
+    modImplementation fabricApi.module("fabric-lifecycle-events-v1", fabric_version)
+}
+loom {
+    splitEnvironmentSourceSets()
+    mods { novex_companion { sourceSet sourceSets.main; sourceSet sourceSets.client } }
+}
+processResources {
+    inputs.property 'version', project.version
+    inputs.property 'minecraft', minecraft_version
+    filesMatching('fabric.mod.json') { expand 'version': project.version, 'minecraft': minecraft_version }
+}
+tasks.withType(JavaCompile).configureEach { options.release = 21; options.encoding = 'UTF-8' }
+java { toolchain.languageVersion = JavaLanguageVersion.of(21); withSourcesJar() }
+
+// These checks use a plain Java entrypoint rather than a bundled test framework.
+sourceSets {
+    verification {
+        compileClasspath += sourceSets.client.output + sourceSets.client.compileClasspath
+        runtimeClasspath += sourceSets.client.output + sourceSets.client.runtimeClasspath
+    }
+}
+tasks.register('foundationTest', JavaExec) {
+    dependsOn verificationClasses, clientClasses
+    classpath = sourceSets.verification.runtimeClasspath
+    mainClass = 'no.novex.companion.FoundationTest'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+}
+check.dependsOn foundationTest
+
+sourceSets.client.java.srcDir("src/compat/${targets[target].adapter}/java")
+
+tasks.register('apiSmoke', JavaExec) {
+    dependsOn verificationClasses, clientClasses
+    classpath = sourceSets.verification.runtimeClasspath
+    mainClass = 'no.novex.companion.ApiSmoke'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+}
+
+sourceSets.client.java.srcDir("src/compat/${['1.21.9','1.21.10','1.21.11'].contains(target) ? 'modernfont' : 'classicfont'}/java")
+sourceSets.client.java.srcDir("src/compat/${targets[target].adapter == 'legacy' ? 'legacynames' : 'statenames'}/java")
+
+// Ship the project's license with the production and source artifacts.
+tasks.withType(Jar).configureEach { from(rootProject.file('LICENSE')) }

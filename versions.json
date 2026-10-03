@@ -1,0 +1,62 @@
+{
+  "1.21": {
+    "mappings": "1.21+build.9",
+    "api": "0.102.0+1.21",
+    "adapter": "legacy"
+  },
+  "1.21.1": {
+    "mappings": "1.21.1+build.3",
+    "api": "0.116.17+1.21.1",
+    "adapter": "legacy"
+  },
+  "1.21.2": {
+    "mappings": "1.21.2+build.1",
+    "api": "0.106.1+1.21.2",
+    "adapter": "layers"
+  },
+  "1.21.3": {
+    "mappings": "1.21.3+build.2",
+    "api": "0.114.1+1.21.3",
+    "adapter": "layers"
+  },
+  "1.21.4": {
+    "mappings": "1.21.4+build.8",
+    "api": "0.119.4+1.21.4",
+    "adapter": "layers"
+  },
+  "1.21.5": {
+    "mappings": "1.21.5+build.1",
+    "api": "0.128.2+1.21.5",
+    "adapter": "layers"
+  },
+  "1.21.6": {
+    "mappings": "1.21.6+build.1",
+    "api": "0.128.2+1.21.6",
+    "adapter": "pipelines"
+  },
+  "1.21.7": {
+    "mappings": "1.21.7+build.8",
+    "api": "0.129.0+1.21.7",
+    "adapter": "pipelines"
+  },
+  "1.21.8": {
+    "mappings": "1.21.8+build.1",
+    "api": "0.136.1+1.21.8",
+    "adapter": "pipelines"
+  },
+  "1.21.9": {
+    "mappings": "1.21.9+build.1",
+    "api": "0.134.1+1.21.9",
+    "adapter": "pipelines"
+  },
+  "1.21.10": {
+    "mappings": "1.21.10+build.3",
+    "api": "0.138.4+1.21.10",
+    "adapter": "pipelines"
+  },
+  "1.21.11": {
+    "mappings": "1.21.11+build.6",
+    "api": "0.141.6+1.21.11",
+    "adapter": "pipelines"
+  }
+}
